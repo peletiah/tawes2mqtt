@@ -68,7 +68,7 @@ def get_station_weather(station_weather_datasets, station_id):
 def mqtt_publish_config(mqtt_client):
     for param in STATION_PARAMS.keys():
         if param in IGNORE_KEYS:
-            return
+            continue
 
         name = STATION_PARAMS[param]["name"]  # Entity name listed in HASS (Home Assistant) (e.g. "Temperature")
         device_class = STATION_PARAMS[param]["device_class"]  # defines the icon used in HASS (e.g. "temperature")
@@ -79,7 +79,7 @@ def mqtt_publish_config(mqtt_client):
 
         payload = {
             "device_class": device_class,
-            "name": f"{name} Fernwärme",
+            "name": f"TAWES {name}",
             "state_topic": f"{BASE_TOPIC}state",
             "unit_of_measurement": unit,
             "value_template": value_template,
@@ -96,10 +96,7 @@ def mqtt_publish_state(mqtt_client, weather_data):
         try:
             value = int(value)
         except ValueError:
-            try:
-                value = float(value)
-            except ValueError:
-                continue
+            value = float(value.replace(",","."))
 
         payload[f"{BASE_ID}{key}"] = value
 
