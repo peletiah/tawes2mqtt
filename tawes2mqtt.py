@@ -29,8 +29,8 @@ STATION_PARAMS = {
     "temperature": {"key": "T °C", "name": "Temperature", "device_class": "temperature", "unit": "°C"},
     "dewpoint": {"key": "TP °C", "name": "Dewpoint", "device_class": "temperature", "unit": "°C"},
     "humidity": {"key": "RF %", "name": "Relative Humidity", "device_class": "humidity", "unit": "%"},
-    "wind_direction": {"key": "WR °", "name": "Avg. Wind Direction", "device_class": "", "unit": "°"},
-    "wind_speed": {"key": "WG km/h", "name": "Avg. Wind Speed", "device_class": "", "unit": "km/h"},
+    "wind_direction": {"key": "WR °", "name": "Avg. Wind Direction", "device_class": "signal_strength", "unit": "°"},
+    "wind_speed": {"key": "WG km/h", "name": "Avg. Wind Speed", "device_class": "signal_strength", "unit": "km/h"},
     "peak_wind_direction": {"key": "WSR °", "name": "Peak Wind Direction", "device_class": "", "unit": "°"},
     "peak_wind_speed": {"key": "WSG km/h", "name": "Peak Wind Speed", "device_class": "", "unit": "km/h"},
     "percipitation": {"key": "N l/m²", "name": "Percipitation", "device_class": "humidity", "unit": "l/m²"},
@@ -67,6 +67,9 @@ def get_station_weather(station_weather_datasets, station_id):
 
 def mqtt_publish_config(mqtt_client):
     for param in STATION_PARAMS.keys():
+        if param in IGNORE_KEYS:
+            return
+
         name = STATION_PARAMS[param]["name"]  # Entity name listed in HASS (Home Assistant) (e.g. "Temperature")
         device_class = STATION_PARAMS[param]["device_class"]  # defines the icon used in HASS (e.g. "temperature")
         unit = STATION_PARAMS[param]["unit"]  # defines the unit used in HASS (e.g. "°C")
