@@ -11,19 +11,20 @@ logger = logging.getLogger()
 # Weather data and station
 TAWES_URL = "https://www.zamg.ac.at/ogd/"
 DESIRED_STATION = "11331"  # Klagenfurt/Flughafen
+IGNORE_KEYS = ['station', 'name', 'height_above_sea_level', 'date', 'time', 'peak_wind_direction', 'peak_wind_speed']
 
 # MQTT configuration
 MQTT_BROKER_IP = "10.0.0.30"
-BASE_TOPIC = "homeassistant/sensor/tawes/"
-BASE_ID = "tawes_weather_"
-mqtt.Client.connected_flag = False
-
-IGNORE_KEYS = ['station', 'name', 'sea_level', 'date', 'time', 'peak_wind_direction', 'peak_wind_speed']
+MQTT_BASE_TOPIC = "homeassistant/sensor/tawes/"
+MQTT_BASE_ID = "tawes_weather_"
+MQTT_NAME_SUFFIX = "tawes weather"
+MQTT_RETAIN = True  # MQTT broker keeps the last message
+MQTT_QOS = 2  # Make sure the MQTT message is only sent once
 
 STATION_PARAMS = {
     "station": {"key": "Station", "name": "Station", "device_class": "", "unit": ""},
     "name": {"key": "Name", "name": "Name", "device_class": "", "unit": ""},
-    "sea_level": {"key": "Höhe m", "name": "Seehöhe", "device_class": "", "unit": "m"},
+    "height_above_sea_level": {"key": "Höhe m", "name": "Seehöhe", "device_class": "", "unit": "m"},
     "date": {"key": "Datum", "name": "Datum", "device_class": "date", "unit": ""},
     "time": {"key": "Zeit", "name": "Zeit", "device_class": "timestamp", "unit": ""},
     "temperature": {"key": "T °C", "name": "Temperature", "device_class": "temperature", "unit": "°C"},
@@ -74,34 +75,34 @@ def mqtt_publish_config(mqtt_client):
         name = STATION_PARAMS[param]["name"]  # Entity name listed in HASS (Home Assistant) (e.g. "Temperature")
         device_class = STATION_PARAMS[param]["device_class"]  # defines the icon used in HASS (e.g. "temperature")
         unit = STATION_PARAMS[param]["unit"]  # defines the unit used in HASS (e.g. "°C")
-        unique_id = f"{BASE_ID}{param}"  # unique identifier used in HASS (e.g. "tawes_temperature")
+        unique_id = f"{MQTT_BASE_ID}{param}"  # unique identifier used in HASS (e.g. "tawes_temperature")
         value_template = f"{{{{ value_json.{unique_id}}}}}"  # defines how HASS extracts the value of this entity
-        topic = f"{BASE_TOPIC}{unique_id}/config"
+        topic = f"{MQTT_BASE_TOPIC}{unique_id}/config"
 
         payload = {
             "device_class": device_class,
-            "name": f"{name} tawes weather",
-            "state_topic": f"{BASE_TOPIC}state",
+            "name": f"{name} {MQTT_NAME_SUFFIX}",
+            "state_topic": f"{MQTT_BASE_TOPIC}state",
             "unit_of_measurement": unit,
             "value_template": value_template,
             "unique_id": unique_id
         }
 
-        mqtt_client.publish(topic, payload=json.dumps(payload), qos=2)
+        mqtt_client.publish(topic, payload=json.dumps(payload), qos=MQTT_QOS, retain=MQTT_RETAIN)
 
 
 def mqtt_publish_state(mqtt_client, weather_data):
-    topic = f"{BASE_TOPIC}state"
+    topic = f"{MQTT_BASE_TOPIC}state"
     payload = dict()
     for key, value in weather_data.items():
         try:
             value = int(value)
         except ValueError:
-            value = float(value.replace(",","."))
+            value = float(value.replace(",", "."))
 
-        payload[f"{BASE_ID}{key}"] = value
+        payload[f"{MQTT_BASE_ID}{key}"] = value
 
-    mqtt_client.publish(topic, payload=json.dumps(payload), qos=2)
+    mqtt_client.publish(topic, payload=json.dumps(payload), qos=MQTT_QOS, retain=MQTT_RETAIN)
 
 
 def on_connect(client, userdata, flags, rc):
@@ -114,6 +115,7 @@ def on_connect(client, userdata, flags, rc):
 
 def mqtt_run(station_weather):
     mqtt_client = mqtt.Client("tawes")
+    mqtt.Client.connected_flag = False
     logger.debug(f"Connecting to mqtt_broker_ip {MQTT_BROKER_IP}")
 
     mqtt_client.connect(MQTT_BROKER_IP)
