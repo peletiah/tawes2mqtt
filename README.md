@@ -61,3 +61,18 @@ The script can be executed manually like this:
 Or through a cronjob (Notice: ZAMG publishes new data ~20 minutes past the full hour, to have some leeway the script is executed every 30 minutes past the full hour):
 
     30 * * * * myuser /my/virtualenv/tawes2mqtt/bin/python /my/virtualenv/tawes2mqtt/tawes2mqtt.py
+
+
+## Debugging
+
+To verify that MQTT messages are sent and contain the desired content, you can use the [Mosquitto](https://mosquitto.org/) client:
+
+    mosquitto_sub -h <mqtt_broker_ip> -t "#" -F  %J
+
+`-h` - defines the hostname or IP of your mqtt broker
+`-t` - defines the topic, "#" listens to everything)
+`-F %J` - specifies the output printing format, `%J` uses the JSON output format with non-quoted and non-escaped payload
+
+See ["Using The Mosquitto_pub and Mosquitto_sub MQTT Client Tools- Examples"](http://www.steves-internet-guide.com/mosquitto_pub-sub-clients/) for more information.
+
+

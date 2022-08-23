@@ -6,7 +6,7 @@ import requests
 import csv
 import paho.mqtt.client as mqtt
 
-logger = logging.getLogger()
+logging.basicConfig(level=logging.DEBUG)
 
 # Weather data and station
 TAWES_URL = "https://www.zamg.ac.at/ogd/"
@@ -108,15 +108,15 @@ def mqtt_publish_state(mqtt_client, weather_data):
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         client.connected_flag = True  # set flag
-        logger.debug("connected OK")
+        logging.debug("connected OK")
     else:
-        logger.debug("Bad connection Returned code=", rc)
+        logging.debug("Bad connection Returned code=", rc)
 
 
 def mqtt_run(station_weather):
     mqtt_client = mqtt.Client("tawes")
     mqtt.Client.connected_flag = False
-    logger.debug(f"Connecting to mqtt_broker_ip {MQTT_BROKER_IP}")
+    logging.debug(f"Connecting to mqtt_broker_ip {MQTT_BROKER_IP}")
 
     mqtt_client.connect(MQTT_BROKER_IP)
     mqtt_client.on_connect = on_connect
@@ -124,9 +124,9 @@ def mqtt_run(station_weather):
     mqtt_client.loop_start()
 
     while not mqtt_client.connected_flag:
-        logger.debug("In mqtt connect wait loop")
+        logging.debug("In mqtt connect wait loop")
         time.sleep(1)
-    logger.debug("Connected to mqtt broker")
+    logging.debug("Connected to mqtt broker")
 
     mqtt_publish_config(mqtt_client)
     mqtt_publish_state(mqtt_client, station_weather)
