@@ -34,7 +34,7 @@ STATION_PARAMS = {
     "peak_wind_direction": {"key": "WSR °", "name": "Peak Wind Direction", "device_class": "", "unit": "°"},
     "peak_wind_speed": {"key": "WSG km/h", "name": "Peak Wind Speed", "device_class": "", "unit": "km/h"},
     "percipitation": {"key": "N l/m²", "name": "Percipitation", "device_class": "humidity", "unit": "l/m²"},
-    "relative_pressure": {"key": "LDred hP", "name": "Relative Pressure", "device_class": "pressure", "unit": "hPa"},
+    "relative_pressure": {"key": "LDred hPa", "name": "Relative Pressure", "device_class": "pressure", "unit": "hPa"},
     "absolute_pressure": {"key": "LDstat hPa", "name": "Absolute Pressure", "device_class": "pressure", "unit": "hPa"},
     "sunshine": {"key": "SO %", "name": "Sunshine per hour", "device_class": "illuminance", "unit": "%"}
 }
@@ -58,9 +58,10 @@ def get_station_weather(station_weather_datasets, station_id):
 
     # create a dictionary using keys from STATION_PARAMS and values from station weather data
     for param_key, param_value in STATION_PARAMS.items():
-        for station_key, station_value in station_dataset.items():
-            if param_value['key'] == station_key and param_key not in IGNORE_KEYS:
-                station_weather[param_key] = station_value
+        if param_key not in IGNORE_KEYS:
+            for station_key, station_value in station_dataset.items():
+                if param_value['key'] == station_key:
+                    station_weather[param_key] = station_value
 
     return station_weather
 
@@ -79,7 +80,7 @@ def mqtt_publish_config(mqtt_client):
 
         payload = {
             "device_class": device_class,
-            "name": f"TAWES {name}",
+            "name": f"{name} tawes weather",
             "state_topic": f"{BASE_TOPIC}state",
             "unit_of_measurement": unit,
             "value_template": value_template,
