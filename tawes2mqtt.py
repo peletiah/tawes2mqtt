@@ -6,8 +6,6 @@ import requests
 import csv
 import paho.mqtt.client as mqtt
 
-logging.basicConfig(level=logging.DEBUG)
-
 # Weather data and station
 TAWES_URL = "https://www.zamg.ac.at/ogd/"
 DESIRED_STATION = "11331"  # Klagenfurt/Flughafen
@@ -20,6 +18,10 @@ MQTT_BASE_ID = "tawes_weather_"
 MQTT_NAME_SUFFIX = "tawes weather"
 MQTT_RETAIN = True  # MQTT broker keeps the last message
 MQTT_QOS = 2  # Make sure the MQTT message is only sent once
+
+# Debugging
+
+LOGLEVEL = logging.WARNING
 
 STATION_PARAMS = {
     "station": {"key": "Station", "name": "Station", "device_class": "", "unit": ""},
@@ -39,6 +41,8 @@ STATION_PARAMS = {
     "absolute_pressure": {"key": "LDstat hPa", "name": "Absolute Pressure", "device_class": "pressure", "unit": "hPa"},
     "sunshine": {"key": "SO %", "name": "Sunshine per hour", "device_class": "illuminance", "unit": "%"}
 }
+
+logging.basicConfig(level=LOGLEVEL)
 
 
 def read_tawes():

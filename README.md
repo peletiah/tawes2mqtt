@@ -64,13 +64,19 @@ Or through a cronjob (Notice: ZAMG publishes new data ~20 minutes past the full 
 
 
 ## Debugging
+                   
+#### Log messages
+
+Logging can be enabled by setting `LOGLEVEL` to `logging.DEBUGGING` (Default: `logging.WARNING`)
+
+#### MQTT messages
 
 To verify that MQTT messages are sent and contain the desired content, you can use the [Mosquitto](https://mosquitto.org/) client:
 
     mosquitto_sub -h <mqtt_broker_ip> -t "#" -F  %J
 
 `-h` - defines the hostname or IP of your mqtt broker
-`-t` - defines the topic, "#" listens to everything)
+`-t` - defines the topic ("#" listens to everything)
 `-F %J` - specifies the output printing format, `%J` uses the JSON output format with non-quoted and non-escaped payload
 
 See ["Using The Mosquitto_pub and Mosquitto_sub MQTT Client Tools- Examples"](http://www.steves-internet-guide.com/mosquitto_pub-sub-clients/) for more information.
